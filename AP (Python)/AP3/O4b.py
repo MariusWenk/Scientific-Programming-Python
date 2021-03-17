@@ -62,10 +62,10 @@ for i in range(countFiles):
     ax[i].grid(True)
     ax[i].set_xlabel("$theta_{Kristall}$ in °")
     ax[i].set_ylabel("$U_{Empf}$ in mV")
+    #ax[i].axis([0,14, 1.2, 1.4])
     
 ax[0].set_title("1-0-0 Ebene")
 ax[1].set_title("1-1-0 Ebene")
-#ax[i].axis([0,14, 1.2, 1.4])
 
 for i in range(countFiles):
     fig[i].savefig("./Plots/%s_%s_plot.png"%(versuchsname,i+ersterDatenIndex), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
