@@ -3,7 +3,7 @@
 """ Bibliotheken importieren """
 import numpy as np
 from matplotlib import pyplot as plt
-# from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit
 # from sympy import *
 
 """ Daten auslesen """
@@ -37,22 +37,6 @@ for i in range(countFiles):
         y_data.append(beamData[i][:,j])
         yerr.append(beamData[i][:,j+4])
 
-""" Regressionskurve """
-# def fitCurve(x, A, B):
-#     return A * np.asarray(x) + B
-
-# pFit, pCov = curve_fit(fitCurve, x_dataPos1, y_dataPos1, p0=[-1,4])
-# plt.plot(x_dataPos1, fitCurve(x_dataPos1, *pFit), label="Fitkurve durch kleinste Quadrate", color="Orange",linewidth=3)
-# perr = np.sqrt(np.diag(pCov))
-# print(perr)
-
-""" Regressionsfunktion """
-# x = Symbol('x')
-# A = pFit[0].round(4)
-# B = pFit[1].round(4)
-# fitCurve1 = A * x + B
-# print(fitCurve1)
-
 """ Plotten """
 fig = []
 ax = []
@@ -72,6 +56,28 @@ for i in range(countFiles):
 
 ax[1].set_title("$\lambda$ = (405 $\pm$ 0,5)nm")
 
+""" Regressionskurve """
+# def fitCurve(x, A, B):
+#     return A * np.asarray(x) + B
+
+# fitRes = []
+# for i in range(4):
+#     fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[-1,4]))
+#     pFit = fitRes[i][0]
+#     pCov = fitRes[i][1]
+#     ax[i].plot(x_data[i], fitCurve(x_data[i], *pFit), label="Fitkurve durch kleinste Quadrate",linewidth=2)
+#     perr = np.sqrt(np.diag(pCov))
+#     print(pCov)
+#     print(perr)
+
+""" Regressionsfunktion """
+# x = Symbol('x')
+# A = pFit[0].round(4)
+# B = pFit[1].round(4)
+# fitCurve1 = A * x + B
+# print(fitCurve1)
+
+""" Plot speichern """
 for i in range(countFiles):
     fig[i].savefig("./Plots/%s_%s_zusammen_plot.png"%(versuchsname,i+ersterDatenIndex), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
 

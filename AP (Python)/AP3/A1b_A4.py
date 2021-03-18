@@ -65,10 +65,10 @@ for i in range(countFiles):
     ax[i].legend()
     ax[i].grid(True)
     ax[i].set_xlabel("Frequenz des Lichts in 10^14 Hz")
-    ax[i].set_ylabel("$h$ in 10^-34 J")
+    ax[i].set_ylabel("$h$ in 10^-34 Js")
     ax[i].axis([2,8,4.5,7.6])
     
 #ax[0].set_title("1-0-0 Ebene")
 
 for i in range(countFiles):
-    fig[i].savefig("./Plots/%s_%s_plot.png"%(versuchsname,9), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    fig[i].savefig("./Plots/%s_%s_plot.png"%(versuchsname,10), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
