@@ -94,7 +94,7 @@ for i in range(countFiles+4):
     
 for i in range(1,9):
     st = "ohne"
-    if (i>5):
+    if (i>4):
         st = "mit"
     ax[i].set_title("U = %s$V$ %s Cunningham-Korrektur"%(Us[(i-1)%4],st))
     
