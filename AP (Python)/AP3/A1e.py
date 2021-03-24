@@ -127,33 +127,108 @@ for i in range(10,14):
     ax[i].set_title("U = %s$V$"%(Us[(i-2)%4])) 
     
 """ Histogram """
-# klassenbreite = 1e-18
-# for i in range(countFiles):
-#     if (i==0):
-#         a = 2
+klassenbreite = 9e-20
+balkenzahl = 32
+y_histogramm = []
+for i in range(countFiles):
+    index = i
+    if (i!=0):
+        index += 4
+    counts = []
+    for j in range(balkenzahl):
+        count = 0
+        for q in y_data[index]:
+            if (q>=(j*klassenbreite) and q<((j+1)*klassenbreite)):
+                count += 1
+        counts.append(count)
+    y_histogramm.append(counts)
+    x_data.append([(klassenbreite)*(j+0.5)/1e-19 for j in range(balkenzahl)])
+    y_data.append(counts)
+x_histogramm = []
+for j in range(balkenzahl):
+    if (j%4 == 0):
+        x_histogramm.append(str(round((klassenbreite)*(j+0.5)/1e-19,2)))
+    else:
+        x_histogramm.append("")
+x_pos = np.arange(balkenzahl)
+
+
+for i in range(countFiles):
+    fig.append(plt.figure())
+    ax.append(fig[i+countFiles+9].add_axes([0.15,0.15,0.75,0.75]))
+    ax[i+countFiles+9].bar(x_pos,y_histogramm[i],label="Histogramm",color="Black")
+    ax[i+countFiles+9].set_xticks(range(balkenzahl))
+    ax[i+countFiles+9].set_xticklabels(x_histogramm, rotation='vertical')
+    ax[i+countFiles+9].legend()
+    ax[i+countFiles+9].set_xlabel("q in 10^-19$C$")
+    ax[i+countFiles+9].set_ylabel("Messanzahl N")
+    # ax[i].axis([0,1,2,3])
+    # ax[i].set(xlim=(0,8))
+    # ax[i].set(ylim=(-0.2,2.2))
+    
+for i in range(14,19):
+    st = "Schwebemethode"
+    if (i>14):
+        st = "Gegenfeldmethode mit U = %s$V$"%Us[(i-3)%4]
+    ax[i].set_title(st)
+                
+        
         
 """ Regressionskurve """ 
-# x_data_unlimited = np.arange(-1,8,0.01)
+plots = 4
+factor = 1
+# inf = [j for j in range(balkenzahl) if j%3==0]
+# sup = [j+3 for j in range(balkenzahl-3) if j%3==0]
+inf = [0,7,13,18]
+sup = [7,13,18,23]
+x_data_limited = []
+for j in range(plots):
+    x_data_limited.append(x_data[countFiles+4][inf[j]*factor:sup[j]*factor])
+y_data_limited = []
+for i in range(countFiles):
+    y_data_limited_single = []
+    for j in range(plots):
+        y_data_limited_single.append(y_data[i+countFiles+4][inf[j]*factor:sup[j]*factor])
+    y_data_limited.append(y_data_limited_single)
 
-# def fitCurve(x, A, B):
-#     return A * np.asarray(x) + B
+x_data_unlimited = np.arange(0,29,0.01)
 
-# perr = []
-# fitRes = []
-# for i in range(1):
-#     fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[-1,4]))
-#     pFit = fitRes[i][0]
-#     pCov = fitRes[i][1]
-#     ax[i].plot(x_data_unlimited, fitCurve(x_data_unlimited, *pFit), label="Fitkurve durch kleinste Quadrate",linewidth=2)
-#     ax[i].legend()
-#     perr.append(np.sqrt(np.diag(pCov)))
+def fitCurve(x, A, B, C):
+    return (1/np.sqrt(2*pi*B))* np.exp(-((x-A)**2)/(2*(B**2))) * C
+
+def flatCurve(x):
+    return 0*np.asarray(x)
+
+perr = []
+fitRes = []
+for i in range(14,19):
+    fitRes_single = []
+    perr_single = []
+    for j in range(plots):
+        try:
+            fitRes_single.append(curve_fit(fitCurve, x_data_limited[j], y_data_limited[i-14][j], p0=[-1,4,0.1], maxfev = 2000))
+            pFit = fitRes_single[len(fitRes_single)-1][0]
+            pCov = fitRes_single[len(fitRes_single)-1][1]
+            ax[i].plot(x_data_unlimited, fitCurve(x_data_unlimited, *pFit), label="Fitkurve durch kleinste Quadrate",linewidth=2)
+            perr_single.append(np.sqrt(np.diag(pCov)))
+        except RuntimeError:
+            print("Not possible")
+        
+    fitRes.append(fitRes_single)
+    perr.append(perr_single)
+    ax[i].legend()
 #     print("Fitfehler",i+1,perr[i])
 
 """ Regressionsfunktion """
 # x = sp.symbols('x')
-# for i in range(1):
-#     A = fitRes[i][0][0].round(4)
-#     B = fitRes[i][0][1].round(4)
+for i in range(5):
+    for j in range(len(fitRes[i])):
+        A = fitRes[i][j][0][0].round(3)
+        delA = perr[i][j][0].round(3)
+        B = fitRes[i][j][0][1].round(3)
+        delB = perr[i][j][1].round(3)
+        print("Erwartungswert Plot %s, Kurve %s = %s mit Fehler %s"%(i+1,j+1,A,delA))
+        print("Standardabweichung Plot %s, Kurve %s = %s mit Fehler %s"%(i+1,j+1,B,delB))
 #     fitCurve = A * x + B
 #     print("Regressionskurve %s: %s"%(i+1,fitCurve))
 #     lambdified_fitCurve = sp.lambdify(x,fitCurve)
@@ -163,6 +238,6 @@ for i in range(10,14):
     # print("Nullstellenfehler %s: %s"%(i+1,np.roots(maxFit)[0]-np.roots(fitRes[i][0])[0]))
     
 """ Plot speichern """
-for i in range(2*countFiles+4):
+for i in range(2*countFiles+9):
     fig[i].savefig("./Plots/%s_%s_plot.png"%(versuchsname,i+ersterDatenIndex), dpi=100,bbox_inches='tight') # Bild als png Datei in Ordner Plots gespeichert
 
