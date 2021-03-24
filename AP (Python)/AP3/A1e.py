@@ -4,8 +4,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
-import sympy as sp
-import math
+# import sympy as sp
+# import math
 
 """ Daten auslesen """
 countFiles = 5
