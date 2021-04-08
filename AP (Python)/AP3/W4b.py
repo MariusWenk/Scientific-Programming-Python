@@ -116,7 +116,8 @@ for i in range(1,6):
     b.append(np.around(x_data[i],3))
     b.append(np.around(xerr[i],3))
     b.append(np.around(y_data[i],3))
-    labels = ["$T_{P}$ in K","$\Delta T_{P}$ in K","$P$ in mW"]
+    b.append(np.around(y_data[i]*1e-3/(((x_data[i])**4)*Fl*boltz),3))
+    labels = ["$T_{P}$ in K","$\Delta T_{P}$ in K","$P$ in mW","$\epsilon_{relativ}$"]
     b = np.array(b).T
     fig.append(plt.figure())
     ax.append(fig[i+5].add_axes([0,0,1,1]))
