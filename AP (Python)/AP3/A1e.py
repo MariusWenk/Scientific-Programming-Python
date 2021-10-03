@@ -18,6 +18,7 @@ for i in range(countFiles):
 beamData = []
 for i in range(countFiles):
     beamData.append(np.loadtxt(file[i], delimiter=","))
+    
 """ Konstanten """
 eta = 18.216e-6
 ro_0 = 874
