@@ -61,8 +61,8 @@ ax[3].set_title("$T$ = -10,3°C")
 ax[4].set_title("$T$ = -21,9°C")
 
 for i in range(countFiles):
-    ax[i].set_xlabel("$t$ in s")
-    ax[i].set_ylabel("$V$ in mV")
+    ax[i].set_xlabel("$t$ (s)")
+    ax[i].set_ylabel("$V$ (mV)")
 
 """ Regressionskurve """ 
 x_data_unlimited = []
@@ -117,7 +117,7 @@ for i in range(countFiles):
     y_data_new.append(y_data[i]-fitCurve(x_data[i], *pFit[i]))
     fig.append(plt.figure())
     ax.append(fig[i+countFiles].add_axes([0.15,0.15,0.75,0.75]))
-    Y.append(np.amax(y_data_new[i]))
+    Y.append(np.amax(y_data_new[i]).round(4))
     string = "$Y$ = %s mV"%Y[i]
     ax[i+countFiles].plot(x_data[i],y_data_new[i],'o',label=string,markersize=2,color="Black")
     ax[i+countFiles].legend()
@@ -130,36 +130,62 @@ ax[8].set_title("$T$ = -10,3°C")
 ax[9].set_title("$T$ = -21,9°C")
 
 for i in range(countFiles, 2*countFiles):
-    ax[i].set_xlabel("$t$ in s")
-    ax[i].set_ylabel("$V$ in mV")
+    ax[i].set_xlabel("$t$ (s)")
+    ax[i].set_ylabel("$V$ (mV)")
     
 T = [-21.9,-10.3,3.6,21.0,30.3]
 fig.append(plt.figure())
 ax.append(fig[10].add_axes([0.15,0.15,0.75,0.75]))
-ax[10].plot(T,Y,'x',label=string,markersize=4,color="Black")
+ax[10].plot(T,Y,'x',markersize=4,color="Black")
 ax[10].grid(True)
-ax[10].set_xlabel("$T$ in °C")
-ax[10].set_ylabel("$Y$ in mV")
+ax[10].set_xlabel("$T$ (°C)")
+ax[10].set_ylabel("$Y(T)$ (mV)")
+
+I = [-2.13,-2.07,-2.15,-1.92,-2.14]
+S = []
+for i in range(5):
+    S.append(I[i]*2)
+fig.append(plt.figure())
+ax.append(fig[11].add_axes([0.15,0.15,0.75,0.75]))
+ax[11].plot(T,S,'x',markersize=4,color="Black")
+ax[11].grid(True)
+ax[11].set_xlabel("$T$ (°C)")
+ax[11].set_ylabel("$S(T)$ (mV/W)")
+
+def fitLine(x, A, B):
+    return (A * np.asarray(x)) + B
+
+fitRes.append(curve_fit(fitLine, T, S, p0=[0.5,-1]))
+pFit.append(fitRes[5][0])
+pCov.append(fitRes[5][1])
+
+x_data_unlimited.append(np.arange(-25,35,1))
+x = sp.symbols('x')
+A = fitRes[5][0][0].round(4)
+B = fitRes[5][0][1].round(4)
+fitCurveSym = A * x + B 
+print("Regressionskurve %s: %s"%(5+1,fitCurveSym))
+string = "Fit: %s"%fitCurveSym
+ax[11].plot(x_data_unlimited[5], fitLine(x_data_unlimited[5], *pFit[5]), label=string, linewidth=2, color="blue")
+ax[11].legend()
     
 """ Daten in Tabelle ausgeben """
-# =============================================================================
-# for i in range(1,6):
-#     b = []
-#     b.append(np.around(x_data[i],3))
-#     b.append(np.around(xerr[i],3))
-#     b.append(np.around(y_data[i],3))
-#     b.append(np.around(y_data[i]*1e-3/(((x_data[i])**4)*Fl*boltz),3))
-#     labels = ["$T_{P}$ in K","$\Delta T_{P}$ in K","$P$ in mW","$\epsilon_{relativ}$"]
-#     b = np.array(b).T
-#     fig.append(plt.figure())
-#     ax.append(fig[i+5].add_axes([0,0,1,1]))
-#     ax[i+5].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
-#     ax[i+5].axis("off")
-#     ax[i+5]
-# =============================================================================
+b = []
+b.append(np.around(T,3))
+b.append(np.around(I,3))
+b.append(np.around(Y,3))
+b.append(np.around(S,3))
+labels = ["$T$ (°C)","$I(T)$ (A)","$Y(T)$ (mV)","$S(T)$ (mV/W)"]
+b = np.array(b).T
+fig.append(plt.figure())
+ax.append(fig[12].add_axes([0,0,1,1]))
+ax[12].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+ax[12].axis("off")
+ax[12]
+
 
 """ Plot speichern """
-for i in range((2*countFiles)+1):
+for i in range((2*countFiles)+3):
     fig[i].savefig("./Plots/%s_%s_plot.png"%(versuchsname,ersterDatenIndex+i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
 
 
