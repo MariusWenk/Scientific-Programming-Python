@@ -122,6 +122,7 @@ for i in range(countFiles):
     ax[i+countFiles].plot(x_data[i],y_data_new[i],'o',label=string,markersize=2,color="Black")
     ax[i+countFiles].legend()
     ax[i+countFiles].grid(True)
+Y = np.flip(Y)
     
 ax[5].set_title("$T$ = 30,3°C")
 ax[6].set_title("$T$ = 21,0°C")
@@ -144,7 +145,7 @@ ax[10].set_ylabel("$Y(T)$ (mV)")
 I = [-2.13,-2.07,-2.15,-1.92,-2.14]
 S = []
 for i in range(5):
-    S.append(I[i]*2)
+    S.append(Y[i]/(I[i]*2))
 fig.append(plt.figure())
 ax.append(fig[11].add_axes([0.15,0.15,0.75,0.75]))
 ax[11].plot(T,S,'x',markersize=4,color="Black")
