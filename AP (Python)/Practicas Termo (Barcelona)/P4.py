@@ -1,4 +1,4 @@
-# Marius Wenk, Pau Gran ́e i Claudi Vall
+# Marius Wenk, Pau Grané i Claudi Vall
 
 """ Bibliotheken importieren """
 import numpy as np
@@ -110,7 +110,7 @@ for i in range(countFiles):
     # maxFit = [fitRes[i][0][0]+perr[i][0],fitRes[i][0][1]-perr[i][1]]
     # print("Nullstellenfehler %s: %s"%(i+1,np.roots(maxFit)[0]-np.roots(fitRes[i][0])[0]))
     
-""" Weitere Plots"""
+""" Weitere Plots """
 y_data_new = []
 Y = []
 for i in range(countFiles):
