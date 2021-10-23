@@ -66,32 +66,35 @@ for i in range(3*countFiles):
     # ax[i].set(ylim=(-0.2,2.2))
     
 for i in range(3):
-    ax[(3*i)].set_title("$T$ = 0Â°C, Mesura %s"%(i+1))
-    ax[(3*i)+1].set_title("$T$ = 53Â°C, Mesura %s"%(i+1))
-    ax[(3*i)+2].set_title("$T$ = 100Â°C, Mesura %s"%(i+1))
+    ax[(3*i)].set_title("$T$ = 0°C, Mesura %s"%(i+1))
+    ax[(3*i)+1].set_title("$T$ = 53°C, Mesura %s"%(i+1))
+    ax[(3*i)+2].set_title("$T$ = 100°C, Mesura %s"%(i+1))
     
 for i in range(3*countFiles):
     ax[i].set_xlabel("$t$ (s)")
-    ax[i].set_ylabel("$\epsilon$ (mV)")
+    ax[i].set_ylabel("$V$ (mV)")
 
 """ Mittelwerte """ 
 y_data_select = []
-s3 = [170,250,150]
-s4 = [230,430,260]
-s5 = [900,1420,760]
-s6 = [950,1500,850]
+s3 = [185,230,170]
+s4 = [240,440,260]
+s5 = [900,1420,810]
+s6 = [970,1520,850]
 for i in range(countFiles):
     y_data_select.append(y_data[(3*i)])
-    mask = np.ones(y_data[(3*i)+1].size, dtype=bool)
-    mask[s3[i]-s1[i]:s4[i]-s1[i]] = True
-    y_data_select.append(y_data[(3*i)+1][mask])
-    mask = np.ones(y_data[(3*i)+2].size, dtype=bool)
-    mask[s5[i]-s2[i]:s6[i]-s2[i]] = True
-    y_data_select.append(y_data[(3*i)+2][mask])
+    mask = np.logical_and(beamData[i][:,0] >= s3[i], beamData[i][:,0] <= s4[i])
+    y_data_select.append(beamData[i][mask,1])
+    mask = np.logical_and(beamData[i][:,0] >= s5[i], beamData[i][:,0] <= s6[i])
+    y_data_select.append(beamData[i][mask,1])
     
 epsilons = []
 for i in range(3*countFiles):
-    epsilons.append(np.mean(y_data_select[i]))
+    if(i%3 == 0):
+        epsilons.append(np.mean(y_data_select[i]))
+    if(i%3 == 1):
+        epsilons.append(np.mean(y_data_select[i+1]))
+    if(i%3 == 2):
+        epsilons.append(np.mean(y_data_select[i-1]))
     
 mean_epsilons = []
 for i in range(countFiles):
@@ -102,15 +105,15 @@ T = [0, 53, 100]
 eps_err = [0.01, 0.01, 0.01]
 fig.append(plt.figure())
 ax.append(fig[9].add_axes([0.15,0.15,0.75,0.75]))
-ax[9].errorbar(T,mean_epsilons,eps_err,fmt='o',markersize=2,color="Black")
+ax[9].errorbar(T,mean_epsilons,eps_err,fmt='X',markersize=10,color="Black")
 # ax[9].legend()
 ax[9].grid(True)
 # ax[9].axis([0,1,2,3])
 # ax[9].set(xlim=(0,8))
 # ax[9].set(ylim=(-0.2,2.2))
     
-ax[i].set_xlabel("$t$ (s)")
-ax[i].set_ylabel("$\epsilon$ (mV)")
+ax[9].set_xlabel("$t = T - T_{0}$ (K)")
+ax[9].set_ylabel("$\epsilon$ (mV)")
 
 """ Regressionskurve """
 def fitCurve(x, A, B):
@@ -129,15 +132,15 @@ for i in range(1):
     #ax[i].set(xlim=(295,370))
 
 """ Regressionsfunktion """
-x = sp.symbols('x')
+t = sp.symbols('t')
 x_data_unlimited = []
 for i in range(1):
     x_data_unlimited.append(np.arange(0,T[-1],0.5))
     A = fitRes[i][0][0].round(10)
     B = fitRes[i][0][1].round(5)
-    fitCurveSym = B * x + A * (x**2)
+    fitCurveSym = B * t + A * (t**2)
     print("Regressionskurve %s: %s"%(i+1,fitCurveSym))
-    string = "Linia base: %s"%fitCurveSym
+    string = "Función de calibración: %s"%fitCurveSym
     ax[i+9].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit[i]), label=string, linewidth=2, color="blue")
     ax[i+9].legend()
     # lambdified_fitCurve = sp.lambdify(x,fitCurve)
@@ -155,7 +158,7 @@ b.append(np.around(epsilons[3:6],3))
 b.append(np.around(epsilons[6:],3))
 b.append(np.around(mean_epsilons,3))
 b.append(np.around(eps_err,3))
-labels = ["$T$ (Â°C)","Mesura 1","Mesura 2","Mesura 3", "Valores medios", "Errores"]
+labels = ["$T$ (°C)","Mesura 1","Mesura 2","Mesura 3", "Valores medios", "Errores"]
 b = np.array(b).T
 fig.append(plt.figure())
 ax.append(fig[10].add_axes([0,0,1,1]))
