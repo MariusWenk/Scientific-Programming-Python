@@ -1,4 +1,4 @@
-# Marius Wenk, Pau Grané i Claudi Vall
+# Marius Wenk, Pau Grane i Claudi Vall
 
 """ Bibliotheken importieren """
 import numpy as np
