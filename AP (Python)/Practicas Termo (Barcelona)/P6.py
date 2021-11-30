@@ -32,15 +32,15 @@ xerr = []
 yerr = []
 for i in range(countFiles):
     s.append(beamData[i][:,0].size)
-    x_data.append(beamData[i][:,0])
+    x_data.append([((beamData[0][j,0])) for j in range(s[i])])
     xerr.append([err_T for j in range(s[i])])
     y_data.append(beamData[i][:,1])
     yerr.append([err_p for j in range(s[i])])
     
 for i in range(2):
     s.append(beamData[0][:,0].size)
-    x_data.append([(1/beamData[0][j,0]) for j in range(s[i])])
-    xerr.append([err_T/((beamData[0][j,0])**2) for j in range(s[i])])
+    x_data.append([(1/(beamData[0][j,0]+273.15)) for j in range(s[i])])
+    xerr.append([err_T/((beamData[0][j,0]+273.15)**2) for j in range(s[i])])
     y_data.append(np.log(beamData[0][:,1]))
     yerr.append([err_p/beamData[0][j,1] for j in range(s[i])])
 
@@ -64,13 +64,13 @@ ax[0].legend()
 
 ax[0].set_xlabel("$T$ (°C)")
 ax[0].set_ylabel("$p$ (MPa)")
-ax[1].set_xlabel("$1/T$ (1/°C)")
-ax[1].set_ylabel("$ln(p)$")
-ax[2].set_xlabel("$1/T$ (1/°C)")
-ax[2].set_ylabel("$ln(p)$")
+ax[1].set_xlabel("$1/T$ (1/K)")
+ax[1].set_ylabel("$ln(p/$MPa$)$")
+ax[2].set_xlabel("$1/T$ (1/K)")
+ax[2].set_ylabel("$ln(p/$MPa$)$")
 
-ax[1].set_title("sin curva de ajuste")
-ax[2].set_title("con curva de ajuste")
+#ax[1].set_title("sin curva de ajuste")
+#ax[2].set_title("con curva de ajuste")
 
 """ Regressionskurve """
 def fitCurve(x, A, B):
@@ -82,8 +82,8 @@ pFit = []
 pCov = []
 x_data_limited = []
 y_data_limited = []
-x_data_limited.append([(1/beamData[0][j,0]) for j in range(2,s[i])])
-y_data_limited.append(np.log(beamData[0][2:,1]))
+x_data_limited.append([(1/(beamData[0][j,0]+273.15)) for j in range(0,s[i])])
+y_data_limited.append(np.log(beamData[0][0:,1]))
 for i in range(1):
     fitRes.append(curve_fit(fitCurve,x_data_limited[i], y_data_limited[i], p0=[0.5,1]))
     pFit.append(fitRes[i][0])
@@ -95,8 +95,8 @@ for i in range(1):
 """ Regressionsfunktion """
 x = sp.symbols('x')
 x_data_unlimited = []
-#x_data_unlimited.append(np.arange(x_data_limited[0][-1],x_data_limited[0][0],0.001))
-x_data_unlimited.append(np.arange(0.02,0.045,0.001))
+x_data_unlimited.append(np.arange(x_data_limited[0][-1],x_data_limited[0][0],0.000001))
+#x_data_unlimited.append(np.arange(0.02,0.045,0.001))
 for i in range(1):
     A = fitRes[i][0][0].round(5)
     B = fitRes[i][0][1].round(5)
