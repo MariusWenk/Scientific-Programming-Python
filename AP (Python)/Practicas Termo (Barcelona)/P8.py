@@ -5,11 +5,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 import sympy as sp
-import csv
-import math
 
 """ Daten auslesen """
-countFiles = 1
+countFiles = 3
 versuchsname = "P8"
 ersterDatenIndex = 1
 file = []
@@ -22,7 +20,7 @@ for i in range(countFiles):
     beamData.append(np.loadtxt(file[i], delimiter=";"))
     
 """ Konstanten """
-err_h = [0.5]
+err_h = [0.5, 0.5, 0.5]
 
 """ Daten vorbereiten """
 s = []
@@ -83,12 +81,13 @@ for i in range(countFiles):
     # ax[i].set(xlim=(0,8))
     # ax[i].set(ylim=(-0.2,2.2))
   
-string = ["Argón"]    
+string = ["Argón", "Aire", "$CO_2$"]
+color = ["Blue", "Orange", "Green"]
 
 fig.append(plt.figure())
 ax.append(fig[countFiles].add_axes([0.15,0.15,0.75,0.75]))
 for i in range(countFiles):
-    ax[countFiles].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],fmt='o',label=string[i],markersize=2,color="Black")
+    ax[countFiles].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],fmt='o',label=string[i],markersize=2,color=color[i])
     # ax[i].axis([0,1,2,3])
     # ax[i].set(xlim=(0,8))
     # ax[i].set(ylim=(-0.2,2.2))
@@ -106,21 +105,15 @@ for i in range(countFiles):
 ax[countFiles].set_title("Comparación")
 
 """ Regressionskurve """
-def fitCurve(x, A, B):
-    return (A * np.asarray(x)) + B
+def fitCurve(x, A):
+    return (A * np.asarray(x))
 
 perr = []
 fitRes = []
 pFit = []
 pCov = []
-x_data_limited = []
-ln_theta_limited = []
-x_data_limited.append(x_data[2][0:15])
-x_data_limited.append(x_data[3][0:10])
-ln_theta_limited.append(ln_theta[0][0:15])
-ln_theta_limited.append(ln_theta[1][0:10])
-for i in range(2):
-    fitRes.append(curve_fit(fitCurve,x_data_limited[i], ln_theta_limited[i], p0=[0.5,1]))
+for i in range(countFiles):
+    fitRes.append(curve_fit(fitCurve,x_data[i], y_data[i], p0=[2]))
     pFit.append(fitRes[i][0])
     pCov.append(fitRes[i][1])
     perr.append(np.sqrt(np.diag(pCov[i])))
@@ -130,15 +123,14 @@ for i in range(2):
 """ Regressionsfunktion """
 x = sp.symbols('x')
 x_data_unlimited = []
-x_data_unlimited.append(np.arange(0,15,0.1))
-x_data_unlimited.append(np.arange(0,10,0.1))
-for i in range(2):
+x_data_unlimited.append(np.arange(0,45,0.1))
+for i in range(countFiles):
     A = fitRes[i][0][0].round(5)
-    B = fitRes[i][0][1].round(5)
-    fitCurveSym = A * x + B
+    fitCurveSym = A * x
     print("Regressionskurve %s: %s"%(i+1,fitCurveSym))
-    ax[i+4].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit[i]), linewidth=2, color="blue")
-    ax[i+4].legend()
+    ax[countFiles].plot(x_data_unlimited[0], fitCurve(x_data_unlimited[0], *pFit[i]), linewidth=2, color=color[i])
+    ax[i].plot(x_data_unlimited[0], fitCurve(x_data_unlimited[0], *pFit[i]), linewidth=2, color="Blue")
+    ax[countFiles].legend()
     # lambdified_fitCurve = sp.lambdify(x,fitCurve)
     # #Nulstellen:
     # print("Nullstellen %s: %s"%(i+1,np.roots(fitRes[i][0])))
