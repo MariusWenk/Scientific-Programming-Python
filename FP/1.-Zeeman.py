@@ -133,66 +133,116 @@ for i in range(countFiles//2):
     ny_ab_err.append(pre_ny_ab_err)
     pre_ny_bc_err = np.around(((pre_delta_bc_med/pre_Delta_med)*(1/(2*t)) * ((pre_delta_bc_med_err/pre_delta_bc_med)+(pre_Delta_med_err/pre_Delta_med)+(t_err/t))),3)
     ny_bc_err.append(pre_ny_bc_err)
-    pre_ny_err = np.around(((pre_delta_med/pre_Delta_med)*(1/(2*t)) * ((pre_delta_med_err/pre_delta_ab_med)+(pre_Delta_med_err/pre_Delta_med)+(t_err/t))),3)
+    pre_ny_err = np.around(abs(((pre_delta_med/pre_Delta_med)*(1/(2*t)) * ((pre_delta_med_err/pre_delta_ab_med)+(pre_Delta_med_err/pre_Delta_med)+(t_err/t)))),3)
     ny_err.append(pre_ny_err)
-    
-    print(np.around(pre_ny/B[i//3],3))
     
     
 """ Daten in Tabelle ausgeben """
-# =============================================================================
-# fig = []
-# ax = []
-# for i in range(countFiles//2):
-#     b = []
-#     zeros = [["" for i in range(delta[i][0].size)],["" for i in range(delta[i][1].size)]]
-#     ma = max(square_r[i][::2].size,square_r[i+countFiles//2].size,square_r[i][::2].size)
-#     b.append(["" if i%2==1 else 1+(i//2) for i in range((ma*2)-1)])
-#     b.append(np.around(list(mi.roundrobin(square[i][0],Delta[i][0])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square[i][0],Delta[i][0])))))
-#     b.append(list(mi.roundrobin(np.around(delta[i][0],3),zeros[0]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta[i][0],zeros[0])))))
-#     b.append(np.around(list(mi.roundrobin(square[i][1],Delta[i][1])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square[i][1],Delta[i][1])))))
-#     b.append(list(mi.roundrobin(np.around(delta[i][1],3),zeros[1]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta[i][1],zeros[1])))))
-#     b.append(np.around(list(mi.roundrobin(square[i][2],Delta[i][2])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square[i][2],Delta[i][2])))))
-#     labels = ["Ordnung","innerste","","mittlere","","äußerste"]
-#     b = np.array(b).T
-#     fig.append(plt.figure())
-#     ax.append(fig[i].add_axes([0,0,1,1]))
-#     ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
-#     ax[i].axis("off")
-#     ax[i]
-#     
-# for i in range(countFiles//2):
-#     b = []
-#     zeros = [["" for i in range(delta[i][0].size)],["" for i in range(delta[i][1].size)]]
-#     ma = max(square_r_err[i][::2].size,square_r_err[i+countFiles//2].size,square_r_err[i][::2].size)
-#     b.append(["" if i%2==1 else 1+(i//2) for i in range((ma*2)-1)])
-#     b.append(np.around(list(mi.roundrobin(square_err[i][0],Delta_err[i][0])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square_err[i][0],Delta_err[i][0])))))
-#     b.append(list(mi.roundrobin(np.around(delta_err[i][0],3),zeros[0]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta_err[i][0],zeros[0])))))
-#     b.append(np.around(list(mi.roundrobin(square_err[i][1],Delta_err[i][1])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square_err[i][1],Delta_err[i][1])))))
-#     b.append(list(mi.roundrobin(np.around(delta_err[i][1],3),zeros[1]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta_err[i][1],zeros[1])))))
-#     b.append(np.around(list(mi.roundrobin(square_err[i][2],Delta_err[i][2])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square_err[i][2],Delta_err[i][2])))))
-#     labels = ["Ordnung","innerste","","mittlere","","äußerste"]
-#     b = np.array(b).T
-#     fig.append(plt.figure())
-#     ax.append(fig[i+countFiles//2].add_axes([0,0,1,1]))
-#     ax[i+countFiles//2].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
-#     ax[i+countFiles//2].axis("off")
-#     ax[i+countFiles//2]
-# 
-# """ Plot speichern """
-# for i in range(countFiles//2):
-#     if i<12:
-#         messung = 12 + i//3
-#     else:
-#         messung = 8 + i//3
-#     farbe = farbArray[i%3]
-#     fig[i].savefig(f"./1.Plots/{messung}{farbe}_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-#     
-# for i in range(countFiles//2):
-#     if i<12:
-#         messung = 12 + i//3
-#     else:
-#         messung = 8 + i//3
-#     farbe = farbArray[i%3]
-#     fig[i+countFiles//2].savefig(f"./1.Plots/{messung}{farbe}_error_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-# =============================================================================
+fig = []
+ax = []
+for i in range(countFiles//2):
+    b = []
+    zeros = [["" for i in range(delta[i][0].size)],["" for i in range(delta[i][1].size)]]
+    ma = max(square_r[i][::2].size,square_r[i+countFiles//2].size,square_r[i][::2].size)
+    b.append(["" if i%2==1 else 1+(i//2) for i in range((ma*2)-1)])
+    b.append(np.around(list(mi.roundrobin(square[i][0],Delta[i][0])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square[i][0],Delta[i][0])))))
+    b.append(list(mi.roundrobin(np.around(delta[i][0],3),zeros[0]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta[i][0],zeros[0])))))
+    b.append(np.around(list(mi.roundrobin(square[i][1],Delta[i][1])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square[i][1],Delta[i][1])))))
+    b.append(list(mi.roundrobin(np.around(delta[i][1],3),zeros[1]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta[i][1],zeros[1])))))
+    b.append(np.around(list(mi.roundrobin(square[i][2],Delta[i][2])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square[i][2],Delta[i][2])))))
+    labels = ["Ordnung","innerste","","mittlere","","äußerste"]
+    b = np.array(b).T
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0,0,1,1]))
+    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i].axis("off")
+    ax[i]
+    
+for i in range(countFiles//2):
+    b = []
+    zeros = [["" for i in range(delta[i][0].size)],["" for i in range(delta[i][1].size)]]
+    ma = max(square_r_err[i][::2].size,square_r_err[i+countFiles//2].size,square_r_err[i][::2].size)
+    b.append(["" if i%2==1 else 1+(i//2) for i in range((ma*2)-1)])
+    b.append(np.around(list(mi.roundrobin(square_err[i][0],Delta_err[i][0])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square_err[i][0],Delta_err[i][0])))))
+    b.append(list(mi.roundrobin(np.around(delta_err[i][0],3),zeros[0]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta_err[i][0],zeros[0])))))
+    b.append(np.around(list(mi.roundrobin(square_err[i][1],Delta_err[i][1])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square_err[i][1],Delta_err[i][1])))))
+    b.append(list(mi.roundrobin(np.around(delta_err[i][1],3),zeros[1]))+[""]*((ma*2)-1-len(list(mi.roundrobin(delta_err[i][1],zeros[1])))))
+    b.append(np.around(list(mi.roundrobin(square_err[i][2],Delta_err[i][2])),3).tolist()+[""]*((ma*2)-1-len(list(mi.roundrobin(square_err[i][2],Delta_err[i][2])))))
+    labels = ["Ordnung","innerste","","mittlere","","äußerste"]
+    b = np.array(b).T
+    fig.append(plt.figure())
+    ax.append(fig[i+countFiles//2].add_axes([0,0,1,1]))
+    ax[i+countFiles//2].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i+countFiles//2].axis("off")
+    ax[i+countFiles//2]
+    
+labelz = []
+table_names = []
+for i in range(countFiles//2):
+    if i<12:
+        messung = 12 + i//3
+    farbe = farbArray[i%3]
+    labelz.append(f"{messung}{farbe}")
+    
+b = []
+table_names.append("Delta")
+b.append(labelz)
+b.append(Delta_med)
+b.append(Delta_med_err)
+labels = ["Messung","$\Delta$","$\Delta$ $\Delta$"]
+b = np.array(b).T
+fig.append(plt.figure())
+ax.append(fig[countFiles].add_axes([0,0,1,1]))
+ax[countFiles].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+ax[countFiles].axis("off")
+ax[countFiles]
+
+b = []
+table_names.append("delta")
+b.append(labelz)
+b.append(delta_ab_med)
+b.append(delta_ab_med_err)
+b.append(delta_bc_med)
+b.append(delta_bc_med_err)
+b.append(delta_med)
+b.append(delta_med_err)
+labels = ["Messung","$\delta_{mi}$","$\Delta$ $\delta_{mi}$","$\delta_{äm}$","$\Delta$ $\delta_{äm}$","$\delta$","$\Delta$ $\delta$"]
+b = np.array(b).T
+fig.append(plt.figure())
+ax.append(fig[countFiles+1].add_axes([0,0,1,1]))
+ax[countFiles+1].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+ax[countFiles+1].axis("off")
+ax[countFiles+1]
+
+b = []
+table_names.append("Ny")
+b.append(labelz)
+b.append(ny_ab)
+b.append(ny_ab_err)
+b.append(ny_bc)
+b.append(ny_bc_err)
+b.append(ny)
+b.append(ny_err)
+labels = ["Messung","$ν_{mi}$","$\Delta$ $ν_{mi}$","$ν_{äm}$","$\Delta$ $ν_{äm}$","$ν$","$\Delta$ $ν$"]
+b = np.array(b).T
+fig.append(plt.figure())
+ax.append(fig[countFiles+2].add_axes([0,0,1,1]))
+ax[countFiles+2].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+ax[countFiles+2].axis("off")
+ax[countFiles+2]
+
+""" Plot speichern """
+for i in range(countFiles//2):
+    if i<12:
+        messung = 12 + i//3
+    farbe = farbArray[i%3]
+    fig[i].savefig(f"./1.Plots/{messung}{farbe}_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    
+for i in range(countFiles//2):
+    if i<12:
+        messung = 12 + i//3
+    farbe = farbArray[i%3]
+    fig[i+countFiles//2].savefig(f"./1.Plots/{messung}{farbe}_error_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    
+for i in range(3):
+    fig[i+countFiles].savefig(f"./1.Plots/{table_names[i]}_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
