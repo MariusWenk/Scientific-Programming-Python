@@ -4,6 +4,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import more_itertools as mi
+from scipy.optimize import curve_fit
+import sympy as sp
 
 """ Daten auslesen """
 countFiles = 24
@@ -23,7 +25,7 @@ for i in range(countFiles):
     beamData.append(np.loadtxt(file[i], delimiter=","))
     
 """ Konstanten """
-t = 2.49
+t = 2.499
 t_err = 0.002
 B = [0.833,0.770,0.592,0.405]
 
@@ -243,6 +245,60 @@ for i in range(countFiles//2):
         messung = 12 + i//3
     farbe = farbArray[i%3]
     fig[i+countFiles//2].savefig(f"./1.Plots/{messung}{farbe}_error_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-    
 for i in range(3):
     fig[i+countFiles].savefig(f"./1.Plots/{table_names[i]}_table.png", dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    
+    
+""" Plotten """
+versuchsname = "zeeman"
+
+fig = []
+ax = []
+lambdas = ["546,1","435,8","405,7"]
+xerr = [0.001 for i in range(len(B))]
+for i in range(3):
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
+    ax[i].errorbar(B,ny[i::3],ny_err[i::3],xerr[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
+    ax[i].legend()
+    ax[i].grid(True)
+    # ax[i].axis([0,1,2,3])
+    # ax[i].set(xlim=(0,8))
+    # ax[i].set(ylim=(-0.2,2.2))
+    ax[i].set_xlabel("$B$ in T")
+    ax[i].set_ylabel("$\Delta$ $ν$ in $mm^{-1}$")
+    ax[i].set_title(f"$\lambda$ = {lambdas[i]}nm")
+
+""" Regressionskurve """ 
+x_data_unlimited = np.arange(0,0.9,0.01)
+
+def fitCurve(x, A):
+    return A * np.asarray(x)
+
+fitRes = []
+perr = []
+for i in range(3):
+    fitRes.append(curve_fit(fitCurve, B, ny[i::3], p0=[-1]))
+    pFit = fitRes[i][0]
+    pCov = fitRes[i][1]
+    ax[i].plot(x_data_unlimited, fitCurve(x_data_unlimited, *pFit), label="Fitkurve durch kleinste Quadrate",linewidth=2)
+    ax[i].legend()
+    perr.append(np.sqrt(np.diag(pCov)))
+    print("Fitfehler",i+1,perr[i])
+    ax[i].set(xlim=(0,0.9))
+
+""" Regressionsfunktion """
+x = sp.symbols('x')
+for i in range(3):
+    A = fitRes[i][0][0].round(4)
+    fitCurve = A * x
+    print("Regressionskurve %s: %s"%(i+1,fitCurve))
+    # lambdified_fitCurve = sp.lambdify(x,fitCurve)
+    # #Nulstellen:
+    # print("Nullstellen %s: %s"%(i+1,np.roots(fitRes[i][0])))
+    # maxFit = [fitRes[i][0][0]+perr[i][0],fitRes[i][0][1]-perr[i][1]]
+    # print("Nullstellenfehler %s: %s"%(i+1,np.roots(maxFit)[0]-np.roots(fitRes[i][0])[0]))
+
+""" Plot speichern """
+for i in range(3):
+    fig[i].savefig("./1.Plots/%s_%s_plot.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
