@@ -187,7 +187,7 @@ for i in range(countFiles//2):
     labelz.append(f"{messung}{farbe}")
     
 b = []
-table_names.append("Delta")
+table_names.append("(capital)Delta")
 b.append(labelz)
 b.append(Delta_med)
 b.append(Delta_med_err)
