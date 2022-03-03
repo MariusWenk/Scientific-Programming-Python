@@ -57,6 +57,15 @@ for i in range(countFiles):
     ax[i].set_xlabel(f"{xlab[i//3]}")
     ax[i].set_ylabel("$I_S$ in $\mu$A")
     ax[i].set_title(f"{stri[i//3]} = {val[i]}, {i//4+1}. Kathode")
+    
+fig.append(plt.figure())
+ax.append(fig[countFiles].add_axes([0.15,0.15,0.75,0.75]))
+for i in range(3):
+    ax[countFiles].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],label=f"{stri[i//3]} = {val[i]}, {i//4+1}. Kathode",fmt='o',markersize=2)
+    ax[countFiles].legend()
+    ax[countFiles].grid(True)
+ax[countFiles].set_xlabel(f"{xlab[0]}")
+ax[countFiles].set_ylabel("$I_S$ in $\mu$A")
 
 """ Regressionskurve """ 
 xmax = [2.8,2.8,2.8,2.8]
@@ -129,5 +138,5 @@ for i in range(4):
     # print("Nullstellenfehler %s: %s"%(i+1,np.roots(maxFit)[0]-np.roots(fitRes[i][0])[0]))
 
 """ Plot speichern """
-for i in range(countFiles):
+for i in range(countFiles+1):
     fig[i].savefig("./2.Plots/%s_%s_plot.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
