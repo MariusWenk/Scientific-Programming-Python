@@ -19,6 +19,10 @@ for i in range(countFiles):
     beamData.append(np.loadtxt(file[i], delimiter=","))
     
 """ Konstanten """
+A = -328.104
+B = 730.294
+A_err = 24.589
+B_err = 8.678
 
 """ Daten vorbereiten """
 s = []
@@ -33,6 +37,14 @@ for i in range(countFiles):
     xerr.append([err[i//3] for j in range(s[i])])
     y_data.append(beamData[i][:,1])
     yerr.append([2 for j in range(s[i])])
+    
+x_data_old = []
+xerr_old = []
+for i in range(3,countFiles):
+    x_data_old.append(x_data[i])
+    x_data[i] = [(A + B * x) for x in x_data[i]]
+    xerr_old.append(xerr[i])
+    xerr[i] = [(A_err + (B_err * x) + (B * 0.02)) for x in x_data_old[i-3]]
 
 x_data[3] = x_data[3][::-1]
 y_data[3] = y_data[3][::-1]
@@ -44,7 +56,7 @@ fig = []
 ax = []
 stri = ["$I_H$","$U_W$","$U_W$"]
 val = ["2,20A","2,51A","2,70A","0,00V","0,00V","3,01V","6,00V","1,50V"]
-xlab = ["$U_W$ in V","$I_H$ in A","$I_H$ in A"]
+xlab = ["$U_W$ in V","$T$ in K","$T$ in K"]
 for i in range(countFiles):
     fig.append(plt.figure())
     ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
@@ -68,8 +80,8 @@ ax[countFiles].set_xlabel(f"{xlab[0]}")
 ax[countFiles].set_ylabel("$I_S$ in $\mu$A")
 
 """ Regressionskurve """ 
-xmax = [2.8,2.8,2.8,2.8]
-xmin = [2.0,2.45,2.45,2.45]
+xmax = [1700,1700,1730,1730]
+xmin = [1100,1450,1450,1450]
 indize = [4,10,8,7]
 fitplots = [3,4,5,7]
 x_data_unlimited = []
@@ -85,58 +97,93 @@ for i in range(4):
     fitRes.append(curve_fit(fitCurve, x_data[fitplots[i]][indize[i]:], y_data[fitplots[i]][indize[i]:], p0=[-1, 1]))
     pFit = fitRes[i][0]
     pCov = fitRes[i][1]
-    ax[fitplots[i]].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label="Fitkurve durch kleinste Quadrate",linewidth=2)
+    A = fitRes[i][0][0].round(2)
+    B = fitRes[i][0][1].round(2)
+    string = f"f(x) = {A}*(x-{B})"
+    print("Regressionskurve %s: %s"%(i+1,string))
+    ax[fitplots[i]].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string,linewidth=2)
     ax[fitplots[i]].legend()
     perr.append(np.sqrt(np.diag(pCov)))
     print("Fitfehler",i+1,perr[i])
     ax[fitplots[i]].set(xlim=(xmin[i],xmax[i]))
 
-""" Regressionsfunktion """
-x = sp.symbols('x')
-for i in range(4):
-    A = fitRes[i][0][0].round(4)
-    B = fitRes[i][0][1].round(4)
-    fitCurve = A * x - B
-    print("Regressionskurve %s: %s"%(i+1,fitCurve))
-    # lambdified_fitCurve = sp.lambdify(x,fitCurve)
-    # #Nulstellen:
-    # print("Nullstellen %s: %s"%(i+1,np.roots(fitRes[i][0])))
-    # maxFit = [fitRes[i][0][0]+perr[i][0],fitRes[i][0][1]-perr[i][1]]
-    # print("Nullstellenfehler %s: %s"%(i+1,np.roots(maxFit)[0]-np.roots(fitRes[i][0])[0]))
     
+""" Plotten """
+x_data_new = []
+xerr_new = []
+y_data_new = []
+yerr_new = []
+for i in range(4):
+    x_data[fitplots[i]] = np.array(x_data[fitplots[i]])
+    y_data[fitplots[i]] = np.array(y_data[fitplots[i]])
+    x_data_new.append(1/x_data[fitplots[i]])
+    xerr_new.append(xerr[fitplots[i]]/(x_data[fitplots[i]]**2))
+    y_data_new.append(np.log(y_data[fitplots[i]]/(x_data[fitplots[i]]**2)))
+    yerr_new.append((1/x_data[fitplots[i]]) + 2/(y_data[fitplots[i]]**2))
+    fig.append(plt.figure())
+    ax.append(fig[i+countFiles+1].add_axes([0.15,0.15,0.75,0.75]))
+    ax[i+countFiles+1].errorbar(x_data_new[i],y_data_new[i],yerr_new[i],xerr_new[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
+    ax[i+countFiles+1].legend()
+    ax[i+countFiles+1].grid(True)
+    # ax[i].axis([0,1,2,3])
+    # ax[i].set(xlim=(0,8))
+    # ax[i].set(ylim=(-0.2,2.2))
+    ax[i+countFiles+1].set_xlabel("$1/T$ in $K^{-1}$")
+    ax[i+countFiles+1].set_ylabel("$ln(I_S/T^2)$ in ln($\mu$A/$K^2$)")
+    ax[i+countFiles+1].set_title(f"{stri[fitplots[i]//3]} = {val[fitplots[i]]}, {fitplots[i]//4+1}. Kathode")
+
 """ Regressionskurve """ 
+xmax = [0.0009,0.0007,0.0007,0.0007]
+xmin = [0.00055,0.00055,0.00055,0.00055]
 x_data_unlimited = []
 for i in range(4):
-    x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.01))
+    x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.00001))
 
 def fitCurve(x, A, B):
-    return A * np.asarray(x-B)
+    return A * np.asarray(x) + B
 
 fitRes = []
 perr = []
-for i in range(4):
-    fitRes.append(curve_fit(fitCurve, x_data[fitplots[i]][indize[i]:], y_data[fitplots[i]][indize[i]:], p0=[-1, 1]))
-    pFit = fitRes[i][0]
-    pCov = fitRes[i][1]
-    ax[fitplots[i]].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label="Fitkurve durch kleinste Quadrate",linewidth=2)
-    ax[fitplots[i]].legend()
-    perr.append(np.sqrt(np.diag(pCov)))
-    print("Fitfehler",i+1,perr[i])
-    ax[fitplots[i]].set(xlim=(xmin[i],xmax[i]))
-
-""" Regressionsfunktion """
+minind = [1,1,0,0]
 x = sp.symbols('x')
 for i in range(4):
-    A = fitRes[i][0][0].round(4)
-    B = fitRes[i][0][1].round(4)
-    fitCurve = A * x - B
-    print("Regressionskurve %s: %s"%(i+1,fitCurve))
-    # lambdified_fitCurve = sp.lambdify(x,fitCurve)
-    # #Nulstellen:
-    # print("Nullstellen %s: %s"%(i+1,np.roots(fitRes[i][0])))
-    # maxFit = [fitRes[i][0][0]+perr[i][0],fitRes[i][0][1]-perr[i][1]]
-    # print("Nullstellenfehler %s: %s"%(i+1,np.roots(maxFit)[0]-np.roots(fitRes[i][0])[0]))
+    fitRes.append(curve_fit(fitCurve, x_data_new[i][minind[i]:indize[i]], y_data_new[i][minind[i]:indize[i]], p0=[-2000, 5]))
+    pFit = fitRes[i][0]
+    pCov = fitRes[i][1]
+    A = fitRes[i][0][0].round(2)
+    B = fitRes[i][0][1].round(2)
+    fitCurveStr = A * x + B
+    string = "f(x) = %s"%fitCurveStr
+    print("Regressionskurve %s: %s"%(i+1,string))
+    ax[i+countFiles+1].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string,linewidth=2)
+    ax[i+countFiles+1].legend()
+    perr.append(np.sqrt(np.diag(pCov)))
+    print("Fitfehler",i+1,perr[i])
+    ax[i+countFiles+1].set(xlim=(xmin[i],xmax[i]))
+    
+""" Plot speichern """
+for i in range(countFiles+5):
+    fig[i].savefig("./2.Plots/%s_%s_plot.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    
+""" Daten in Tabelle ausgeben """
+fig = []
+ax = []
+for i in range(3,countFiles):
+    b = []
+    b.append(np.around(x_data_old[i-3],3))
+    b.append(np.around(xerr_old[i-3],3))
+    b.append(np.around(x_data[i],3))
+    b.append(np.around(xerr[i],3))
+    b.append(np.around(y_data[i],3))
+    b.append(np.around(yerr[i],3))
+    labels = ["$I_H$ in A","$\Delta I_H$ in A",f"{xlab[i//3]}",f"$\Delta${xlab[i//3]}","$I_S$ in $\mu$A","$\Delta I_S$ in $\mu$A"]
+    b = np.array(b).T
+    fig.append(plt.figure())
+    ax.append(fig[i-3].add_axes([0,0,1,1]))
+    ax[i-3].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i-3].axis("off")
+    ax[i-3]
 
 """ Plot speichern """
-for i in range(countFiles+1):
-    fig[i].savefig("./2.Plots/%s_%s_plot.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+for i in range(5):
+    fig[i].savefig("./2.Plots/%s_%s_table.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
