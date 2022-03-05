@@ -129,7 +129,7 @@ for i in range(4):
     # ax[i].set(xlim=(0,8))
     # ax[i].set(ylim=(-0.2,2.2))
     ax[i+countFiles+1].set_xlabel("$1/T$ in $K^{-1}$")
-    ax[i+countFiles+1].set_ylabel("$ln(I_S/T^2)$ in ln($\mu$A/$K^2$)")
+    ax[i+countFiles+1].set_ylabel("$ln(I_S/T^2)$")
     ax[i+countFiles+1].set_title(f"{stri[fitplots[i]//3]} = {val[fitplots[i]]}, {fitplots[i]//4+1}. Kathode")
 
 """ Regressionskurve """ 
@@ -182,8 +182,22 @@ for i in range(3,countFiles):
     ax.append(fig[i-3].add_axes([0,0,1,1]))
     ax[i-3].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
     ax[i-3].axis("off")
-    ax[i-3]
+    ax[i-3].set_title(f"{stri[i//3]} = {val[i]}, {i//4+1}. Kathode")
+    
+for i in range(4):
+    b = []
+    b.append(np.around(x_data_new[i][minind[i]:],6))
+    b.append(np.around(xerr_new[i][minind[i]:],6))
+    b.append(np.around(y_data_new[i][minind[i]:],3))
+    b.append(np.around(yerr_new[i][minind[i]:],3))
+    labels = ["$1/T$ in $K^{-1}$","$\Delta 1/T$ in $K^{-1}$","$ln(I_S/T^2)$","$\Delta ln(I_S/T^2)$"]
+    b = np.array(b).T
+    fig.append(plt.figure())
+    ax.append(fig[i+5].add_axes([0,0,1,1]))
+    ax[i+5].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i+5].axis("off")
+    ax[i+5].set_title(f"{stri[fitplots[i]//3]} = {val[fitplots[i]]}, {fitplots[i]//4+1}. Kathode")
 
 """ Plot speichern """
-for i in range(5):
-    fig[i].savefig("./2.Plots/%s_%s_table.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+for i in range(9):
+    fig[i].savefig("./2.Plots/%s_%s_table.png"%(versuchsname,i), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
