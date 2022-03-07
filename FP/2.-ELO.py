@@ -228,20 +228,29 @@ f_err = [(del_l*eps[i]+p_err[i]*eps[i]+(l-p[i])*eps_err[i]) for i in range(3)]
 print(f_err)
 I = np.array([2.26, 1.56, 0.86])
 del_I = 0.01
+the = [45.86,1.75,-52.62]
+del_the = 2
 
 """ Daten vorbereiten """
-countFiles = 1
+countFiles = 2
 s = []
 x_data = []
 y_data = []
 xerr = []
 yerr = []
-for i in range(countFiles):
+for i in range(1):
     s.append(len(f))
     x_data.append(1/I**2)
     xerr.append([del_I/I[j]**3 for j in range(s[i])])
     y_data.append(f)
     yerr.append(f_err)
+    
+for i in range(1):
+    s.append(len(I))
+    x_data.append(I)
+    xerr.append([del_I for j in range(s[i])])
+    y_data.append(the)
+    yerr.append([del_the for j in range(s[i])])
     
 print(x_data)
 print(xerr)
@@ -260,12 +269,16 @@ for i in range(countFiles):
     # ax[i].axis([0,1,2,3])
     # ax[i].set(xlim=(0,8))
     # ax[i].set(ylim=(-0.2,2.2))
-    ax[i].set_xlabel("$1/I_L^2$ in 1/$A^2$")
-    ax[i].set_ylabel("$f$ in mm")
+    
+ax[0].set_xlabel("$1/I_L^2$ in 1/$A^2$")
+ax[0].set_ylabel("$f$ in mm")
+ax[1].set_xlabel("$I_L$ in A")
+ax[1].set_ylabel("$\Theta$ in mm")
+
 
 """ Regressionskurve """ 
-xmax = [1.4]
-xmin = [-0.1]
+xmax = [1.4,2.4]
+xmin = [-0.1,0]
 x_data_unlimited = []
 for i in range(countFiles):
     x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.01))
@@ -297,7 +310,7 @@ def fitCurve(x, A):
 fitRes = []
 perr = []
 x = sp.symbols('x')
-for i in range(countFiles):
+for i in range(1):
     fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[-1]))
     pFit = fitRes[i][0]
     pCov = fitRes[i][1]
