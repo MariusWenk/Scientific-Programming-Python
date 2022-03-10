@@ -388,8 +388,8 @@ for i in range(3):
     b.append(np.around(r[i],3))
     b.append(np.around(theta[i],4))
     b.append(np.around(theta_err[i],4))
-    b.append(np.around(sintq[i],5))
-    b.append(np.around(sintq_err[i],5))
+    b.append(np.around(sintq[i],6))
+    b.append(np.around(sintq_err[i],6))
     labels = ["$d_{R}$ in mm","$d_{L}$ in mm","$d$ in mm","$r$ in mm","$\Theta$","$\Delta \Theta$","$sin^2(\Theta)$","$\Delta sin^2(\Theta)$"]
     b = np.array(b).T        
     fig.append(plt.figure())
@@ -401,4 +401,35 @@ for i in range(3):
 """ Plot speichern """
 for i in range(3):
     fig[i].savefig("./2.Plots/%s_%s_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    
+""" Weitere Rechnungen """
+fig = []
+ax = []
+maxj = [10, 15, 23]
+for i in range(3):
+    num = min(len(sintq[i]),3)
+    sample = []
+    labels = []
+    labels.append("Divisor")
+    for j in range(num):
+        sample.append(sintq[i][j])
+        sample.append(sintq_err[i][j])
+        labels.append(f"$sin_{j+1}^2(\Theta)$")
+        labels.append(f"$\Delta sin_{j+1}^2(\Theta)$")
+    sample = np.array(sample)
+    b = []
+    for j in range(1,maxj[i]):
+        b.append([j] + np.around(sample/j,8).tolist())
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0,0,1,1]))
+    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i].axis("off")
+    ax[i].set_title(f"{stri[i]}")
+    
+""" Plot speichern """
+for i in range(3):
+    fig[i].savefig("./2.Plots/%s_%s_sin_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    
+    
+
 
