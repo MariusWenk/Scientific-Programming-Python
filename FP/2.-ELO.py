@@ -332,104 +332,266 @@ import sympy as sp
 # =============================================================================
 
 
-""" Konstanten, Rechnungen """
-versuchsname = "ELO3"
+# =============================================================================
+# """ Konstanten, Rechnungen """
+# versuchsname = "ELO3"
+# 
+# dr = []
+# dr.append([14.27, 23.87])
+# dr.append([12.41, 13.51, 19.16, 23.51])
+# dr.append([7.76, 14.95, 26.67])
+# dr.append(["(-> 9.)", 38.38, 42.89, 48.03, 51.62, 54.72, 56.76, 60.19])
+# 
+# dl = []
+# dl.append([14.14, 21.54])
+# dl.append([12.31, 13.69, 19.61, 23.24])
+# dl.append([7.83, 14.58, 25.54])
+# dl.append([30.01, 37.25, 42.3, 47.24, 50.79, 54.82, 58.02, 61.37])
+# 
+# roff = [0,0,0,1]
+# b = 207.2
+# del_b = 2.1
+# del_r = 0.5
+# 
+# d = []
+# r = []
+# theta = []
+# theta_err = []
+# sintq = []
+# sintq_err = []
+# for i in range(4):
+#     d.append(np.array([(dr[i][j]+dl[i][j])/2 if j>=roff[i] else dl[i][j] for j in range(len(dr[i]))]))
+#     r.append(d[i]/2)
+#     theta.append(np.arctan(r[i]/b)/2)
+#     theta_err.append((1/(2*(1+((r[i]/b)**2))))*((del_r/b)+((del_b*r[i])/(b**2))))
+#     sintq.append(np.sin(theta[i])**2)
+#     sintq_err.append(2*np.sin(theta[i])*np.cos(theta[i])*theta_err[i])
+#     
+# """ Daten in Tabelle ausgeben """
+# stri = ["Thalliumchlorid", "Aluminium", "Molybdänoxid"]
+# 
+# fig = []
+# ax = []
+# for i in range(3):
+#     b = []
+#     if i == 1:
+#         dr[i] = dr[i] + dr[3]
+#         dl[i] = dl[i] + dl[3]
+#         d[i] = d[i].tolist() + d[3].tolist()
+#         r[i] = r[i].tolist() + r[3].tolist()
+#         theta[i] = theta[i].tolist() + theta[3].tolist()
+#         theta_err[i] = theta_err[i].tolist() + theta_err[3].tolist()
+#         sintq[i] = sintq[i].tolist() + sintq[3].tolist()
+#         sintq_err[i] = sintq_err[i].tolist() + sintq_err[3].tolist()
+#     b.append(dr[i])
+#     b.append(dl[i])
+#     b.append(np.around(d[i],3))
+#     b.append(np.around(r[i],3))
+#     b.append(np.around(theta[i],4))
+#     b.append(np.around(theta_err[i],4))
+#     b.append(np.around(sintq[i],6))
+#     b.append(np.around(sintq_err[i],6))
+#     labels = ["$d_{R}$ in mm","$d_{L}$ in mm","$d$ in mm","$r$ in mm","$\Theta$ in °","$\Delta \Theta$ in °","$sin^2(\Theta)$","$\Delta sin^2(\Theta)$"]
+#     b = np.array(b).T        
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0,0,1,1]))
+#     ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+#     ax[i].axis("off")
+#     ax[i].set_title(f"{stri[i]}")
+#     
+# """ Plot speichern """
+# for i in range(3):
+#     fig[i].savefig("./2.Plots/%s_%s_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     
+# """ Weitere Rechnungen """
+# fig = []
+# ax = []
+# maxj = [10, 15, 23]
+# for i in range(3):
+#     num = min(len(sintq[i]),3)
+#     sample = []
+#     labels = []
+#     labels.append("Divisor")
+#     for j in range(num):
+#         sample.append(sintq[i][j])
+#         sample.append(sintq_err[i][j])
+#         labels.append(f"$sin_{j+1}^2(\Theta)$")
+#         labels.append(f"$\Delta sin_{j+1}^2(\Theta)$")
+#     sample = np.array(sample)
+#     b = []
+#     for j in range(1,maxj[i]):
+#         b.append([j] + np.around(sample/j,8).tolist())
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0,0,1,1]))
+#     ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+#     ax[i].axis("off")
+#     ax[i].set_title(f"{stri[i]}")
+#     
+# """ Plot speichern """
+# for i in range(3):
+#     fig[i].savefig("./2.Plots/%s_%s_sin_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     
+# """ Weitere Rechnungen """
+# sint1 = [1.4826e-4, 5.466e-5, 4.483e-5]
+# del_sint1 = [1.991e-5, 0.861e-5, 0.788e-5]
+# 
+# fig = []
+# ax = []
+# x_data = []
+# xerr = []
+# y_data = []
+# yerr = []
+# for i in range(3):
+#     b = []
+#     sintq[i] = np.array(sintq[i])
+#     sintq_err[i] = np.array(sintq_err[i])
+#     x_data.append(np.around(sintq[i]/sint1[i],0).astype(int))
+#     xerr.append(np.around((sintq_err[i]/sint1[i])+(del_sint1[i]*sintq[i])/(sint1[i]**2),0))
+#     b.append(np.around(sintq[i],6))
+#     b.append(np.around(sintq_err[i],6))
+#     b.append(np.around(sintq[i]/sint1[i],2))
+#     b.append(np.around((sintq_err[i]/sint1[i])+(del_sint1[i]*sintq[i])/(sint1[i]**2),2))
+#     b.append(x_data[i])
+#     b.append(xerr[i])
+#     labels = ["$sin^2(\Theta)$","$\Delta sin^2(\Theta)$", "$n^2(h^2+k^2+l^2)$", "$\Delta n^2(h^2+k^2+l^2)$", "~$n^2(h^2+k^2+l^2)$", "$\Delta$ ~$n^2(h^2+k^2+l^2)$"]
+#     b = np.array(b).T        
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0,0,1,1]))
+#     ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+#     ax[i].axis("off")
+#     ax[i].set_title(f"{stri[i]}")
+#     
+# """ Plot speichern """
+# for i in range(3):
+#     fig[i].savefig("./2.Plots/%s_%s_nhkl_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#        
+# countFiles = 3
+# fig = []
+# ax = []
+# for i in range(countFiles):
+#     y_data.append(sintq[i])
+#     yerr.append(sintq_err[i])
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
+#     ax[i].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
+#     ax[i].legend()
+#     ax[i].grid(True)
+#     # ax[i].axis([0,1,2,3])
+#     # ax[i].set(xlim=(0,8))
+#     # ax[i].set(ylim=(-0.2,2.2))
+#     ax[i].set_xlabel("$n^2(h^2+k^2+l^2)$")
+#     ax[i].set_ylabel("$sin^2(\Theta)$")
+#     ax[i].set_title(f"{stri[i]}")
+# 
+# 
+# """ Regressionskurve """ 
+# xmax = [7,110,30]
+# xmin = [-1,-1,-1]
+# x_data_unlimited = []
+# for i in range(countFiles):
+#     x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.01))
+# 
+# def fitCurve(x, A):
+#     return A * np.asarray(x)
+# 
+# fitRes = []
+# perr = []
+# x = sp.symbols('x')
+# for i in range(countFiles):
+#     fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[-1]))
+#     pFit = fitRes[i][0]
+#     pCov = fitRes[i][1]
+#     A = fitRes[i][0][0].round(8)
+#     fitCurveStr = A * x
+#     string = "$f$(x) = %s"%fitCurveStr
+#     print("Regressionskurve %s: %s"%(i+1,string))
+#     ax[i].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string,linewidth=2)
+#     ax[i].legend()
+#     perr.append(np.sqrt(np.diag(pCov)))
+#     print("Fitfehler",i+1,perr[i])
+#     ax[i].set(xlim=(xmin[i],xmax[i]))
+# 
+# """ Plot speichern """
+# for i in range(3):
+#     fig[i].savefig("./2.Plots/%s_%s_nhkl_plot.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+# 
+# =============================================================================
 
-dr = []
-dr.append([14.27, 23.87])
-dr.append([12.41, 13.51, 19.16, 23.51])
-dr.append([7.76, 14.95, 26.67])
-dr.append(["(-> 9.)", 38.38, 42.89, 48.03, 51.62, 54.72, 56.76, 60.19])
-
-dl = []
-dl.append([14.14, 21.54])
-dl.append([12.31, 13.69, 19.61, 23.24])
-dl.append([7.83, 14.58, 25.54])
-dl.append([30.01, 37.25, 42.3, 47.24, 50.79, 54.82, 58.02, 61.37])
-
-roff = [0,0,0,1]
-b = 207.2
-del_b = 2.1
-del_r = 0.5
-
-d = []
-r = []
-theta = []
-theta_err = []
-sintq = []
-sintq_err = []
-for i in range(4):
-    d.append(np.array([(dr[i][j]+dl[i][j])/2 if j>=roff[i] else dl[i][j] for j in range(len(dr[i]))]))
-    r.append(d[i]/2)
-    theta.append(np.arctan(r[i]/b)/2)
-    theta_err.append((1/(2*(1+((r[i]/b)**2))))*((del_r/b)+((del_b*r[i])/(b**2))))
-    sintq.append(np.sin(theta[i])**2)
-    sintq_err.append(2*np.sin(theta[i])*np.cos(theta[i])*theta_err[i])
+""" Daten auslesen """
+countFiles = 2
+versuchsname = "V2.4"
+ersterDatenIndex = 1
+file = []
+for i in range(countFiles):
+    i += ersterDatenIndex
+    file.append(open("2.Daten/%s_%s_data.csv"%(versuchsname,i), encoding="charmap"))
+beamData = []
+for i in range(countFiles):
+    beamData.append(np.loadtxt(file[i], delimiter=","))
     
-""" Daten in Tabelle ausgeben """
-stri = ["Thalliumchlorid", "Aluminium", "Molybdänoxid"]
+""" Konstanten """
+
+""" Daten vorbereiten """
+s = []
+x_data = []
+y_data = []
+xerr = []
+yerr = []
+for i in range(countFiles):
+    s.append(beamData[i][:,0].size)
+    x_data.append(beamData[i][:,0])
+    xerr.append([1 for j in range(s[i])])
+    y_data.append(beamData[i][:,1])
+    yerr.append([0.1*y_data[i][j] for j in range(s[i])])
+
+""" Plotten """
+versuchsname = "ELO4"
 
 fig = []
 ax = []
-for i in range(3):
-    b = []
-    if i == 1:
-        dr[i] = dr[i] + dr[3]
-        dl[i] = dl[i] + dl[3]
-        d[i] = d[i].tolist() + d[3].tolist()
-        r[i] = r[i].tolist() + r[3].tolist()
-        theta[i] = theta[i].tolist() + theta[3].tolist()
-        theta_err[i] = theta_err[i].tolist() + theta_err[3].tolist()
-        sintq[i] = sintq[i].tolist() + sintq[3].tolist()
-        sintq_err[i] = sintq_err[i].tolist() + sintq_err[3].tolist()
-    b.append(dr[i])
-    b.append(dl[i])
-    b.append(np.around(d[i],3))
-    b.append(np.around(r[i],3))
-    b.append(np.around(theta[i],4))
-    b.append(np.around(theta_err[i],4))
-    b.append(np.around(sintq[i],6))
-    b.append(np.around(sintq_err[i],6))
-    labels = ["$d_{R}$ in mm","$d_{L}$ in mm","$d$ in mm","$r$ in mm","$\Theta$","$\Delta \Theta$","$sin^2(\Theta)$","$\Delta sin^2(\Theta)$"]
-    b = np.array(b).T        
+stri = ["Drehschieberpumpe", "Turbomolekularpumpe"]
+for i in range(countFiles):
     fig.append(plt.figure())
-    ax.append(fig[i].add_axes([0,0,1,1]))
-    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
-    ax[i].axis("off")
+    ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
+    ax[i].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
+    ax[i].legend()
+    ax[i].grid(True)
+    # ax[i].axis([0,1,2,3])
+    # ax[i].set(xlim=(0,8))
+    # ax[i].set(ylim=(-0.2,2.2))
+    ax[i].set_xlabel("$t$ in s")
+    ax[i].set_ylabel("$p$ in mbar")
     ax[i].set_title(f"{stri[i]}")
+
+""" Regressionskurve """ 
+xmax = [380,45]
+xmin = [2,-1]
+x_data_unlimited = []
+for i in range(countFiles):
+    x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.01))
+
+def fitCurve(x, A, B, C):
+    return A * np.asarray(np.exp(-x/B)) + C
+
+fitRes = []
+perr = []
+for i in range(countFiles):
+    fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[1, 1, 0.0036]))
+    pFit = fitRes[i][0]
+    pCov = fitRes[i][1]
+    A = fitRes[i][0][0].round(4)
+    B = fitRes[i][0][1].round(3)
+    C = fitRes[i][0][2].round(4)
+    string = f"p(t) = {C} + {A}*(exp(-t/{B})"
+    print("Regressionskurve %s: %s"%(i+1,string))
+    ax[i].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string,linewidth=2)
+    ax[i].legend()
+    perr.append(np.sqrt(np.diag(pCov)))
+    print("Fitfehler",i+1,perr[i])
+    ax[i].set(xlim=(xmin[i],xmax[i]))
+
+#ax[0].set(ylim=(-2,12))
     
 """ Plot speichern """
-for i in range(3):
-    fig[i].savefig("./2.Plots/%s_%s_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-    
-""" Weitere Rechnungen """
-fig = []
-ax = []
-maxj = [10, 15, 23]
-for i in range(3):
-    num = min(len(sintq[i]),3)
-    sample = []
-    labels = []
-    labels.append("Divisor")
-    for j in range(num):
-        sample.append(sintq[i][j])
-        sample.append(sintq_err[i][j])
-        labels.append(f"$sin_{j+1}^2(\Theta)$")
-        labels.append(f"$\Delta sin_{j+1}^2(\Theta)$")
-    sample = np.array(sample)
-    b = []
-    for j in range(1,maxj[i]):
-        b.append([j] + np.around(sample/j,8).tolist())
-    fig.append(plt.figure())
-    ax.append(fig[i].add_axes([0,0,1,1]))
-    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
-    ax[i].axis("off")
-    ax[i].set_title(f"{stri[i]}")
-    
-""" Plot speichern """
-for i in range(3):
-    fig[i].savefig("./2.Plots/%s_%s_sin_table.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-    
-    
-
-
+for i in range(countFiles):
+    fig[i].savefig("./2.Plots/%s_%s_plot.png"%(versuchsname,stri[i]), bbox_inches='tight', dpi=100) # Bild als png Datei in Ordner Plots gespeichert
