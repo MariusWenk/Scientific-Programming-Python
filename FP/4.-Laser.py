@@ -633,3 +633,33 @@ for i in range(1):
 for i in range(1):
     fig[i].savefig("./4.Plots/%s_table.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
     plt.close(fig[i])
+    
+
+""" Daten auslesen """
+countFiles = 60
+versuchsindex = 4
+ersterDatenIndex = 21
+beamData = []
+for i in range(countFiles):
+    i += ersterDatenIndex
+    file = open(f"{versuchsindex}.Daten/ALL{i:04d}/F{i:04d}CH1.CSV", encoding="charmap")
+    beamData.append(np.loadtxt(file, delimiter=",", usecols=(3,4)))
+    file.close()
+    
+""" Konstanten """
+d = [51+(3*i) for i in range(20)]
+U_err = 0.1
+t_err = 
+
+""" Daten vorbereiten """
+s = []
+x_data = []
+y_data = []
+xerr = []
+yerr = []
+for i in range(countFiles):
+    s.append(beamData[i][:,0].size)
+    x_data.append(beamData[i][:,0])
+    xerr.append([t_err for j in range(s[i])])
+    y_data.append(beamData[i][:,1])
+    yerr.append([U_err for j in range(s[i])])
