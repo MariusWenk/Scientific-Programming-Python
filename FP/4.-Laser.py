@@ -5,6 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 import sympy as sp
+from scipy.signal import argrelextrema
+from scipy.signal import find_peaks
 
 # =============================================================================
 # 
@@ -211,7 +213,7 @@ import sympy as sp
 # 
 # """ Plot speichern """
 # for i in range(countFiles):
-#     fig[i].savefig("./4.Plots/%s_%s_plot.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     fig[i].savefig("./4.Plots/%s_%s_plot.png"%(versuchsname,i+ersterDatenIndex), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
 #     plt.close(fig[i])
 #     
 # """ Tabelle ausgeben """
@@ -427,7 +429,7 @@ import sympy as sp
 # 
 # """ Plot speichern """
 # for i in range(countFiles):
-#     fig[i].savefig("./4.Plots/%s_%s_plot.png"%(versuchsname,i), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     fig[i].savefig("./4.Plots/%s_%s_plot.png"%(versuchsname,i+ersterDatenIndex), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
 #     plt.close(fig[i])
 #     
 # """ Tabelle ausgeben """
@@ -539,100 +541,100 @@ import sympy as sp
 # =============================================================================
 
 
-""" Daten vorbereiten """
-d = np.array([51+(3*i) for i in range(20)])
-del_d = 0.4
-I_D = np.array([130.7,123.5,119.8,119.7,123.3,132.1,109.5,112.2,116.1,123,111.8,103.7,102.8,110.7,85.2,80.2,80.5,82.2,66,25.5])
-del_I_D = 1
-del_I_D1 = 10.47
-R = 0.735e-1
-del_R = 0.01e-1
-lamb = 632.8e-7
-F = (R**2)/(lamb*d)
-F_err = ((R**2)/(lamb*(d**2)) * del_d) + ((R*2*del_R)/(lamb*d))
-P = (1.95/476.45)*I_D
-P_err = (((1.95*del_I_D1)/(476.45**2))*I_D) + ((1.95/476.45)*del_I_D)
-
-""" Plotten """
-versuchsname = "Ausgangsleistung"
-
-x_data = [F]
-xerr = [F_err]
-y_data = [P]
-yerr = [P_err]
-fig = []
-ax = []
-for i in range(1):
-    fig.append(plt.figure())
-    ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
-    ax[i].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
-    ax[i].legend()
-    ax[i].grid(True)
-    # ax[i].axis([0,1,2,3])
-    # ax[i].set(xlim=(0,8))
-    # ax[i].set(ylim=(-0.2,2.2))
-    ax[i].set_xlabel("Fresnelzahl $F$")
-    ax[i].set_ylabel("$P$ in mW")
-    ax[i].set_title("sphärisch-sphärisch")
-    
-""" Regressionskurve """ 
-xmax = []
-xmin = []
-x_data_unlimited = []
-for i in range(1):
-    xmax.append(max(x_data[i]) + 0.05)   
-    xmin.append(min(x_data[i]) - 0.05)
-    x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.001))
-
-def fitCurve(x, A, B, C):
-    return A - B * np.asarray(np.exp(C/(x**1.5)))
-
-fitRes = []
-perr = []
-x = sp.symbols('x')
-for i in range(1):
-    fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[4,2.5,0.19]))
-    pFit = fitRes[i][0]
-    pCov = fitRes[i][1]
-    perr.append(np.sqrt(np.diag(pCov)))
-    A = pFit[0].round(3)
-    B = pFit[1].round(3)
-    C = pFit[2].round(3)
-    string = "$P(F)$ = %s - %s * exp(%s*$F^{-(3/2)}$)"%(A,B,C)
-    print("Regressionskurve %s: %s"%(i+1,string))
-    ax[i].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string, linewidth=2)
-    ax[i].legend()
-    print("Fitfehler",i+1,perr[i])
-    ax[i].set(xlim=(xmin[i],xmax[i]))
-
-""" Plot speichern """
-for i in range(1):
-    fig[i].savefig("./4.Plots/%s_plot.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-    plt.close(fig[i])
-    
-""" Tabelle ausgeben """
-versuchsname = "Winkeldivergenz_sp-pl"
-fig = []
-ax = []
-for i in range(1):
-    b = []
-    b.append(np.around(d,1))
-    b.append(np.around(I_D,1))
-    b.append(np.around(P,3))
-    b.append(np.around(P_err,3))
-    b.append(np.around(F,3))
-    b.append(np.around(F_err,2))
-    labels = ["$d$ in cm", "$I_D$ in $\mu$A", "$P$ in mW", "$\Delta P$ in mW", "Fresnelzahl $F$", "$\Delta F$"]
-    b = np.array(b).T
-    fig.append(plt.figure())
-    ax.append(fig[i].add_axes([0,0,1,1]))
-    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
-    ax[i].axis("off")
-    
-""" Plot speichern """
-for i in range(1):
-    fig[i].savefig("./4.Plots/%s_table.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
-    plt.close(fig[i])
+# =============================================================================
+# """ Daten vorbereiten """
+# d = np.array([51+(3*i) for i in range(20)])
+# del_d = 0.4
+# I_D = np.array([130.7,123.5,119.8,119.7,123.3,132.1,109.5,112.2,116.1,123,111.8,103.7,102.8,110.7,85.2,80.2,80.5,82.2,66,25.5])
+# del_I_D = 1
+# del_I_D1 = 10.47
+# R = 0.735e-1
+# del_R = 0.01e-1
+# lamb = 632.8e-7
+# F = (R**2)/(lamb*d)
+# F_err = ((R**2)/(lamb*(d**2)) * del_d) + ((R*2*del_R)/(lamb*d))
+# P = (1.95/476.45)*I_D
+# P_err = (((1.95*del_I_D1)/(476.45**2))*I_D) + ((1.95/476.45)*del_I_D)
+# 
+# """ Plotten """
+# versuchsname = "Ausgangsleistung"
+# 
+# x_data = [F]
+# xerr = [F_err]
+# y_data = [P]
+# yerr = [P_err]
+# fig = []
+# ax = []
+# for i in range(1):
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
+#     ax[i].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
+#     ax[i].legend()
+#     ax[i].grid(True)
+#     # ax[i].axis([0,1,2,3])
+#     # ax[i].set(xlim=(0,8))
+#     # ax[i].set(ylim=(-0.2,2.2))
+#     ax[i].set_xlabel("Fresnelzahl $F$")
+#     ax[i].set_ylabel("$P$ in mW")
+#     ax[i].set_title("sphärisch-sphärisch")
+#     
+# """ Regressionskurve """ 
+# xmax = []
+# xmin = []
+# x_data_unlimited = []
+# for i in range(1):
+#     xmax.append(max(x_data[i]) + 0.05)   
+#     xmin.append(min(x_data[i]) - 0.05)
+#     x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.001))
+# 
+# def fitCurve(x, A, B, C):
+#     return A - B * np.asarray(np.exp(C/(x**1.5)))
+# 
+# fitRes = []
+# perr = []
+# for i in range(1):
+#     fitRes.append(curve_fit(fitCurve, x_data[i], y_data[i], p0=[4,2.5,0.19]))
+#     pFit = fitRes[i][0]
+#     pCov = fitRes[i][1]
+#     perr.append(np.sqrt(np.diag(pCov)))
+#     A = pFit[0].round(4)
+#     B = pFit[1].round(4)
+#     C = pFit[2].round(4)
+#     string = "$P(F)$ = %s - %s * exp(%s*$F^{-(3/2)}$)"%(A,B,C)
+#     print("Regressionskurve %s: %s"%(i+1,string))
+#     ax[i].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string, linewidth=2)
+#     ax[i].legend()
+#     print("Fitfehler",i+1,np.around(perr[i],4))
+#     ax[i].set(xlim=(xmin[i],xmax[i]))
+# 
+# """ Plot speichern """
+# for i in range(1):
+#     fig[i].savefig("./4.Plots/%s_plot.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     plt.close(fig[i])
+#     
+# """ Tabelle ausgeben """
+# fig = []
+# ax = []
+# for i in range(1):
+#     b = []
+#     b.append(np.around(d,1))
+#     b.append(np.around(I_D,1))
+#     b.append(np.around(P,3))
+#     b.append(np.around(P_err,3))
+#     b.append(np.around(F,3))
+#     b.append(np.around(F_err,3))
+#     labels = ["$d$ in cm", "$I_D$ in $\mu$A", "$P$ in mW", "$\Delta P$ in mW", "Fresnelzahl $F$", "$\Delta F$"]
+#     b = np.array(b).T
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0,0,1,1]))
+#     ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+#     ax[i].axis("off")
+#     
+# """ Plot speichern """
+# for i in range(1):
+#     fig[i].savefig("./4.Plots/%s_table.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     plt.close(fig[i])
+# =============================================================================
     
 
 """ Daten auslesen """
@@ -648,8 +650,8 @@ for i in range(countFiles):
     
 """ Konstanten """
 d = [51+(3*i) for i in range(20)]
-U_err = 0.1
-t_err = 
+U_err = 0.001
+t_err = [0.0001,0.00001,0.00001]
 
 """ Daten vorbereiten """
 s = []
@@ -659,7 +661,243 @@ xerr = []
 yerr = []
 for i in range(countFiles):
     s.append(beamData[i][:,0].size)
-    x_data.append(beamData[i][:,0])
-    xerr.append([t_err for j in range(s[i])])
-    y_data.append(beamData[i][:,1])
+    x_data.append(np.array(beamData[i][:,0]))
+    xerr.append([t_err[i%3] for j in range(s[i])])
+    y_data.append(np.array(beamData[i][:,1]))
     yerr.append([U_err for j in range(s[i])])
+    
+""" Plotten """
+versuchsname = "Longitudinalmoden"
+stri = ["zu $\Delta T$", "zu $\Delta t$", "mit Nachleuchten"]
+invested = [2,2,2,2,2,3,2,3,3,3,2,2,2,3,3,3,2,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,2,2,1,2]
+invested_indizes = []
+
+fig = []
+ax = []
+for i in range(countFiles):
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0.15,0.15,0.75,0.75]))
+    ax[i].errorbar(x_data[i],y_data[i],yerr[i],xerr[i],label="Werte mit Fehler",fmt='o',markersize=2,color="Black")
+    ax[i].legend()
+    ax[i].grid(True)
+    # ax[i].axis([0,1,2,3])
+    # ax[i].set(xlim=(0,8))
+    # ax[i].set(ylim=(-0.2,2.2))
+    ax[i].set_xlabel("$t$ in s")
+    ax[i].set_ylabel("$U_F$ in V")
+    ax[i].set_title(f"$d$ = {d[i//3]}cm, Aufnahme {stri[i%3]}")
+    
+    if i%3 == 0 or i%3 == 1:
+        y_max1, _ = find_peaks(y_data[i], height=0.02)
+        ax[i].plot(x_data[i][y_max1],y_data[i][y_max1],'o',label="Maxima",markersize=10,color="Blue")
+    
+        y_max2, _ = find_peaks(y_data[i][y_max1], height=0.02)
+        ax[i].plot(x_data[i][y_max1][y_max2],y_data[i][y_max1][y_max2],'o',label="Maxima",markersize=10,color="Green")
+        
+        y_max3, _ = find_peaks(y_data[i][y_max1][y_max2], height=0.02)
+        ax[i].plot(x_data[i][y_max1][y_max2][y_max3],y_data[i][y_max1][y_max2][y_max3],'o',label="Maxima",markersize=10,color="Red")
+    
+        if invested[((i//3)*2)+(i%3)] == 1:
+            invested_indizes.append(y_max1)
+        elif invested[((i//3)*2)+(i%3)] == 2:
+            invested_indizes.append(y_max1[y_max2])
+        else:
+            invested_indizes.append(y_max1[y_max2[y_max3]])
+
+        
+""" Regressionskurve """ 
+xmax = []
+xmin = []
+x_data_unlimited = []
+for i in range(countFiles//3):
+    xmax.append(max(x_data[(i*3)+2]) + 0.001)   
+    xmin.append(min(x_data[(i*3)+2]) - 0.001)
+    x_data_unlimited.append(np.arange(xmin[i],xmax[i],0.0001))
+
+def fitCurve(x, A, B, C):
+    return A * np.asarray(np.exp(-2*((x-C)**2)/(B**2)))
+
+fitRes = []
+perr = []
+for i in range(countFiles//3):
+    fitRes.append(curve_fit(fitCurve, x_data[(i*3)+2], y_data[(i*3)+2], p0=[0.4, 0.04, 0.1]))
+    pFit = fitRes[i][0]
+    pCov = fitRes[i][1]
+    perr.append(np.sqrt(np.diag(pCov)))
+    A = fitRes[i][0][0].round(4)
+    B = abs(fitRes[i][0][1].round(4))
+    C = fitRes[i][0][2].round(4)
+    string = "$f_{%s}$(x) = %s * exp(-(2$(x-%s)^2$)/$%s^2$)"%(i+1,A,C,B)
+    print("Regressionskurve %s: %s"%(i+1,string))
+    ax[(i*3)+2].plot(x_data_unlimited[i], fitCurve(x_data_unlimited[i], *pFit), label=string,linewidth=2)
+    ax[(i*3)+2].legend()
+    print("Fitfehler",i+1,perr[i])
+    ax[(i*3)+2].set(xlim=(xmin[i],xmax[i]))
+
+""" Plot speichern """
+for i in range(countFiles):
+    fig[i].savefig("./4.Plots/%s_%s_plot.png"%(versuchsname,i+ersterDatenIndex), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    plt.close(fig[i])
+    
+
+""" Tabelle ausgeben """
+fig = []
+ax = []
+for i in range((countFiles//3)*2):
+    b = []
+    b.append(np.arange(invested_indizes[i].size).astype(int))
+    b.append(np.around(x_data[((i//2)*3)+(i%2)][invested_indizes[i]],6))
+    b.append(np.around(y_data[((i//2)*3)+(i%2)][invested_indizes[i]],6))
+    labels = ["#", "$t$ in s", "$U_F$ in V"]
+    b = np.array(b).T        
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0,0,1,1]))
+    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i].axis("off")
+
+""" Plot speichern """
+for i in range((countFiles//3)*2):
+    fig[i].savefig("./4.Plots/%s_%s_table.png"%(versuchsname,((i//2)*3)+(i%2)+ersterDatenIndex), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    plt.close(fig[i])
+    
+versuchsname = "Maxima_FPI"
+    
+elected = []
+elected.append([0,1,3,4])
+elected.append([3,8,4])
+elected.append([0,4,7,9])
+elected.append([3,12,5])
+elected.append([0,3,5,7])
+elected.append([0,4,4])
+elected.append([2,4,6,7])
+elected.append([0,4,5])
+elected.append([0,1,2,3])
+elected.append([2,5,4])
+elected.append([1,4,7,9])
+elected.append([3,8,4]) #5
+elected.append([1,2,4,6])
+elected.append([1,3,3])
+elected.append([0,1,2,3])
+elected.append([1,3,3])
+elected.append([2,3,8,13])
+elected.append([2,6,4])
+elected.append([0,2,3,4])
+elected.append([0,3,4])
+elected.append([1,2,3,4])
+elected.append([3,10,3])
+elected.append([0,2,3,4])
+elected.append([1,3,3])
+elected.append([0,3,6,10])
+elected.append([6,12,4])
+elected.append([0,2,5,6])
+elected.append([3,7,4])
+elected.append([0,1,2,4])
+elected.append([0,3,4])
+elected.append([1,2,3,4])
+elected.append([1,5,4])
+elected.append([0,2,5,6])
+elected.append([1,5,3])
+elected.append([0,1,4,7])
+elected.append([1,3,3])
+elected.append([0,1,2,3])
+elected.append([0,4,4])
+elected.append([0,2,6,7])
+elected.append([0,1,2])
+
+DeltaT1 = []
+DeltaT2 = []
+Deltatn = []
+n = []
+for i in range(countFiles//3):
+    DeltaT1.append(x_data[(i*3)+0][invested_indizes[(i*2)+0]][elected[(i*2)+0]][1] - x_data[(i*3)+0][invested_indizes[(i*2)+0]][elected[(i*2)+0]][0])
+    DeltaT2.append(x_data[(i*3)+0][invested_indizes[(i*2)+0]][elected[(i*2)+0]][3] - x_data[(i*3)+0][invested_indizes[(i*2)+0]][elected[(i*2)+0]][2])
+    Deltatn.append(x_data[(i*3)+1][invested_indizes[(i*2)+1]][elected[(i*2)+1][:2]][1] - x_data[(i*3)+1][invested_indizes[(i*2)+1]][elected[(i*2)+1][:2]][0])
+    n.append(elected[(i*2)+1][2]-1)
+
+DeltaT1 = np.array(DeltaT1)
+DeltaT2 = np.array(DeltaT2)
+Deltatn = np.array(Deltatn)
+n = np.array(n)
+Deltat = Deltatn/n
+DeltaT = (DeltaT1 + DeltaT2) /2
+
+""" Tabelle ausgeben """
+fig = []
+ax = []
+for i in range(1):
+    b = []
+    b.append(np.around(d,1))
+    b.append(np.around(DeltaT1*1000,3))
+    b.append(np.around(DeltaT2*1000,3))
+    b.append(np.around(DeltaT*1000,3))
+    b.append(np.around(Deltatn*1000,3))
+    b.append(np.around(n,0))
+    b.append(np.around(Deltat*1000,3))
+    labels = ["$d$ in cm", "$\Delta T_1$ in ms", "$\Delta T_2$ in ms", "$\Delta T$ in ms", "$\Delta t * n$ in ms", "$n$", "$\Delta t$ in ms"]
+    b = np.array(b).T        
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0,0,1,1]))
+    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i].axis("off")
+
+""" Plot speichern """
+for i in range(1):
+    fig[i].savefig("./4.Plots/%s_table.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    plt.close(fig[i])
+    
+# =============================================================================
+# """ Tabelle ausgeben """
+# versuchsname = "Modenfrequenzen"
+# 
+# fig = []
+# ax = []
+# for i in range(1):
+#     b = []
+#     b.append(np.around(d,1))
+#     b.append(np.around(DeltaT1*1000,3))
+#     b.append(np.around(DeltaT2*1000,3))
+#     b.append(np.around(DeltaT*1000,3))
+#     b.append(np.around(Deltatn*1000,3))
+#     b.append(np.around(n,0))
+#     b.append(np.around(Deltat*1000,3))
+#     labels = ["$d$ in cm", "$\Delta T_1$ in ms", "$\Delta T_2$ in ms", "$\Delta T$ in ms", "$\Delta t * n$ in ms", "$n$", "$\Delta t$ in ms"]
+#     b = np.array(b).T        
+#     fig.append(plt.figure())
+#     ax.append(fig[i].add_axes([0,0,1,1]))
+#     ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+#     ax[i].axis("off")
+# 
+# """ Plot speichern """
+# for i in range(1):
+#     fig[i].savefig("./4.Plots/%s_table.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+#     plt.close(fig[i])
+#     
+# =============================================================================
+    
+""" Tabelle ausgeben """
+versuchsname = "Verstärkungsbreite_FPI"
+
+fig = []
+ax = []
+for i in range(1):
+    b = []
+    w = np.array([abs(fitRes[j][0][1]) for j in range(len(d))])*1000
+    w_err = np.array([perr[j][1] for j in range(len(d))])*1000
+    b.append(np.around(d,1))
+    b.append(np.around(np.array([fitRes[j][0][0] for j in range(len(d))])*1000,3))
+    b.append(np.around(np.array([perr[j][0] for j in range(len(d))])*1000,3))
+    b.append(np.around(w,3))
+    b.append(np.around(w_err,3))
+    b.append(np.around(np.array([fitRes[j][0][2] for j in range(len(d))])*1000,3))
+    b.append(np.around(np.array([perr[j][2] for j in range(len(d))])*1000,3))
+    labels = ["$d$ in cm", "$I_0$ in mV", "$\Delta I_0$ in mV", "$w$ in $\mu$m", "$\Delta w$ in $\mu$m", "$x_0$ in $\mu$m", "$\Delta x_0$ in $\mu$m"]
+    b = np.array(b).T        
+    fig.append(plt.figure())
+    ax.append(fig[i].add_axes([0,0,1,1]))
+    ax[i].table(cellText=b,colLabels=labels,loc='center',rowLoc='center')
+    ax[i].axis("off")
+
+""" Plot speichern """
+for i in range(1):
+    fig[i].savefig("./4.Plots/%s_table.png"%(versuchsname), dpi=100) # Bild als png Datei in Ordner Plots gespeichert
+    plt.close(fig[i])
