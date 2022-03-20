@@ -5,7 +5,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 import sympy as sp
-from scipy.signal import argrelextrema
 from scipy.signal import find_peaks
 
 # =============================================================================
